@@ -1,0 +1,20 @@
+name: Scheduled Job
+
+on:
+  schedule:
+    # Runs every day at 02:00 UTC
+    - cron: '10 11 * * *'
+
+  # Optional: allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  run-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run script
+        run: echo "Running scheduled workflow"
