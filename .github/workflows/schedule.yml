@@ -11,7 +11,7 @@ on:
     # Adjust the hour for your own timezone / market if needed.
 
     # Day trading scan — Mon–Fri at 13:30 UTC (09:30 ET, US market open)
-    - cron: "24 12 * * 1-5"
+    - cron: "30 12 * * 1-5"
 
     # Weekly swing scan — Friday at 22:00 UTC (18:00 ET, after market close)
     - cron: "0 22 * * 5"
