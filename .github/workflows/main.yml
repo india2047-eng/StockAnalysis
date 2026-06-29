@@ -13,8 +13,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Show files
-        run: ls -la
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+ 
+      - name: Run stock signal scan
+        run: python stock_signals.py
+ 
+      # Keep CSV + log files as downloadable artifacts (optional, 7-day retention)
+      - name: Upload signal CSV and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signals-${{ github.run_id }}
+          path: |
+            signals_*.csv
+            signals_*.log
+          retention-days: 30
+          if-no-files-found: ignore
 
       - name: Success
         run: echo "Workflow executed successfully"
