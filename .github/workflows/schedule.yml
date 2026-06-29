@@ -1,20 +1,53 @@
-name: Scheduled Job
+name: Stock Signal Generator
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Runs the stock signal scanner on a schedule using GitHub's free cloud runners.
+# No local PC needs to be on. Results are emailed via Gmail SMTP.
+# ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    # Runs every day at 02:00 UTC
-    - cron: '10 11 * * *'
+    # NOTE: GitHub Actions cron is always UTC. Times below assume US market.
+    # Adjust the hour for your own timezone / market if needed.
 
-  # Optional: allow manual trigger
-  workflow_dispatch:
+    # Day trading scan — Mon–Fri at 13:30 UTC (09:30 ET, US market open)
+    - cron: "30 12 * * 1-5"
+
+    # Weekly swing scan — Friday at 22:00 UTC (18:00 ET, after market close)
+    - cron: "0 22 * * 5"
+
+  # Lets you manually trigger a run from the Actions tab (for testing)
+  workflow_dispatch: {}
 
 jobs:
-  run-job:
+  run-signal-scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run script
-        run: echo "Running scheduled workflow"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run stock signal scan
+        run: python stock_signals.py
+
+      # Keep CSV + log files as downloadable artifacts (optional, 7-day retention)
+      - name: Upload signal CSV and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signals-${{ github.run_id }}
+          path: |
+            signals_*.csv
+            signals_*.log
+          retention-days: 30
+          if-no-files-found: ignore
